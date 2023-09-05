@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'about_dialog.dart' as been_about_dialog;
 
@@ -14,7 +15,6 @@ class RegexCraftsman extends StatefulWidget {
 class _RegexCraftsmanState extends State<RegexCraftsman> {
   String _regex = "";
   String _testText = "";
-  String _replaceWithText = "";
   String _textReplaced = "";
 
   List<String> _matches = [];
@@ -63,7 +63,13 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     List<Text> finalResult = [];
     try {
       if (_regex.isEmpty || markdown.isEmpty) {
-        return const Text("Please fill all fields");
+        return Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(
+                  width: 1, color: Theme.of(context).colorScheme.onBackground),
+            ),
+            child: const Text("Please fill all fields"));
       }
       RegExp exp = RegExp(_regex,
           multiLine: multiline,
@@ -84,24 +90,72 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         finalResult
             .add(_buildText(text: markdown.substring(0, markdown.length)));
       }
-    } catch (err) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text("Something went wrong when trying to render the result.")));
-    }
+    } catch (err) {}
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
             width: 1, color: Theme.of(context).colorScheme.onBackground),
       ),
-      child: SingleChildScrollView(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          child: Wrap(
-            children: finalResult,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                child: Wrap(
+                  children: finalResult,
+                ),
+              ),
+            ),
           ),
-        ),
+          PopupMenuButton(
+            icon: Icon(Icons.menu),
+            position: PopupMenuPosition.under,
+            itemBuilder: (BuildContext ctx) {
+              return [
+                PopupMenuItem(
+                  onTap: () async {
+                    final hightlightedText =
+                        _matches.map((e) => e).toList().join(",");
+
+                    await Clipboard.setData(
+                        ClipboardData(text: hightlightedText));
+                  },
+                  child: const Row(
+                    children: [
+                      Icon(Icons.copy),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text("Copy highlighted text"),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  onTap: () async {
+                    final notHightlightedText =
+                        _testText.split(RegExp(_regex)).join(",");
+
+                    await Clipboard.setData(
+                        ClipboardData(text: notHightlightedText));
+                  },
+                  child: const Row(
+                    children: [
+                      Icon(Icons.copy),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text("Copy not highlighted text"),
+                    ],
+                  ),
+                )
+              ];
+            },
+          ),
+        ],
       ),
     );
   }
@@ -109,7 +163,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   _buildText({String text = "test", colorized = false}) {
     return Text(
       text,
-      style: TextStyle(color: colorized ? Colors.red : null),
+      style: TextStyle(
+        color: colorized ? Colors.green : null,
+        fontSize: colorized ? 16 : null,
+      ),
     );
   }
 
@@ -347,12 +404,20 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           height: 10,
         ),
         Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 2)),
-            child: SingleChildScrollView(
-              child:
-                  Container(width: double.infinity, child: Text(_textReplaced)),
+          child: InkWell(
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: _textReplaced));
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Copied to clipboard!")));
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white, width: 2)),
+              child: SingleChildScrollView(
+                child: SizedBox(
+                    width: double.infinity, child: Text(_textReplaced)),
+              ),
             ),
           ),
         ),
