@@ -65,7 +65,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              "Something went wrong when trying to parse the regex. ${err}")));
+              "Something went wrong when trying to parse the regex: ${err}")));
     }
   }
 
@@ -152,7 +152,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                   ),
                 ),
                 PopupMenuButton<int>(
-                  icon: const Icon(Icons.menu),
+                  tooltip: "Copy to clipboard",
+                  icon: const Icon(Icons.copy),
                   position: PopupMenuPosition.under,
                   itemBuilder: (BuildContext ctx) {
                     return [
@@ -264,6 +265,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           },
           items: [
             BottomNavigationBarItem(
+              tooltip: "Highlight matched strings",
               icon: Icon(
                 Icons.colorize,
                 color: _selectedIndex == 0 ? Colors.deepPurple : null,
@@ -271,12 +273,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               label: "Match",
             ),
             BottomNavigationBarItem(
+                tooltip: "View the list of matched strings",
                 icon: Icon(
                   Icons.list,
                   color: _selectedIndex == 1 ? Colors.deepPurple : null,
                 ),
                 label: "List"),
             BottomNavigationBarItem(
+                tooltip: "Replace matched string with a custom keyword",
                 icon: Icon(
                   Icons.find_replace,
                   color: _selectedIndex == 2 ? Colors.deepPurple : null,
@@ -295,6 +299,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         ),
         actions: [
           IconButton(
+            tooltip: "About this application",
             onPressed: () {
               PackageInfo.fromPlatform().then((value) => showDialog(
                   context: context,
@@ -323,7 +328,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 alignLabelWithHint: true,
                 isDense: true,
                 prefixIcon: PopupMenuButton(
-                  icon: Icon(Icons.arrow_drop_down),
+                  tooltip: "Common Regular Expressions",
+                  icon: const Icon(Icons.arrow_drop_down),
                   itemBuilder: (context) {
                     return [
                       ...communityRegex.map((e) => PopupMenuItem(
@@ -345,6 +351,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                     //   icon: const Icon(Icons.save),
                     // ),
                     PopupMenuButton<int>(
+                        tooltip: "Regular Expression configuration and utils",
                         position: PopupMenuPosition.under,
                         icon: const Icon(Icons.menu),
                         itemBuilder: (BuildContext ctx) {
@@ -502,7 +509,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                               ),
                             ),
                             PopupMenuButton<int>(
-                              icon: const Icon(Icons.menu),
+                              tooltip: "Copy to clipboard",
+                              icon: const Icon(Icons.copy),
                               position: PopupMenuPosition.under,
                               itemBuilder: (BuildContext ctx) {
                                 return [
@@ -612,7 +620,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                     ),
                   ),
                   PopupMenuButton(
-                    icon: Icon(Icons.menu),
+                    tooltip: "Copy to clipboard",
+                    icon: const Icon(Icons.copy),
                     position: PopupMenuPosition.under,
                     itemBuilder: (BuildContext ctx) {
                       return [
