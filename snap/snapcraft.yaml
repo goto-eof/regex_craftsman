@@ -12,7 +12,7 @@ architectures:
   - build-on: arm64
 
 apps:
-  regex_craftsman:
+  regex-craftsman:
     command: regex_craftsman
     extensions: [gnome]
     plugs: [network, network-bind, home]
@@ -22,7 +22,7 @@ parts:
     plugin: nil
     stage-snaps:
       - zenity-integration
-  regex_craftsman:
+  regex-craftsman:
     build-packages: [curl]
     source: .
     plugin: flutter
