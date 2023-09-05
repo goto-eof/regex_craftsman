@@ -15,22 +15,44 @@ class RegexCraftsman extends StatefulWidget {
 }
 
 class _RegexCraftsmanState extends State<RegexCraftsman> {
-  String _regex = "";
   String _testText = "";
   String _textReplaced = "";
 
   List<String> _matches = [];
+  List<Map<String, dynamic>> communityRegex = [];
+
+  final TextEditingController _regexController = TextEditingController();
+  final TextEditingController _replaceWithController = TextEditingController();
 
   int _selectedIndex = 0;
+
+  List<Widget> _colorizedText = [];
 
   bool multiline = true;
   bool caseSensitive = true;
   bool unicode = false;
   bool doAll = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadCommunityRegex();
+  }
+
+  Future<void> _loadCommunityRegex() async {
+    final String response =
+        await rootBundle.loadString('assets/data/community_regex.json');
+    final communityRegexData =
+        List<Map<String, dynamic>>.from(await json.decode(response));
+    print(communityRegexData);
+    setState(() {
+      communityRegex = communityRegexData;
+    });
+  }
+
   void _evaluate() {
     try {
-      RegExp exp = RegExp("$_regex",
+      RegExp exp = RegExp(_regexController.text,
           multiLine: multiline,
           caseSensitive: caseSensitive,
           dotAll: doAll,
@@ -39,14 +61,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
       setState(() {
         _matches = matches.map((e) => e[0]!).toList();
       });
+      _processColorizedText();
+      _processReplaceWith(null);
     } catch (err) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content:
-              Text("Something went wrong when trying to parse the regex.")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              "Something went wrong when trying to parse the regex. ${err}")));
     }
   }
-
-  _onChangedTestText(String? value) {}
 
   Widget _aboutDialogBuilder(BuildContext context, final String version) {
     return been_about_dialog.AboutDialog(
@@ -60,142 +82,163 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     );
   }
 
-  _loadColorizedText() {
-    String markdown = _testText.replaceAll("\r\n", "").replaceAll("\n", "");
-    List<Text> finalResult = [];
+  _processColorizedText() {
+    String testText = _testText.replaceAll("\r\n", "").replaceAll("\n", "");
     try {
-      // if (_regex.isEmpty || markdown.isEmpty) {
-      //   return Container(
-      //       width: double.infinity,
-      //       decoration: BoxDecoration(
-      //         border: Border.all(
-      //             width: 1, color: Theme.of(context).colorScheme.onBackground),
-      //       ),
-      //       child: const Text("Please fill all fields"));
-      // }
-      if (_regex.isNotEmpty & markdown.isNotEmpty) {
-        RegExp exp = RegExp(_regex,
+      if (_regexController.text.isNotEmpty & testText.isNotEmpty) {
+        setState(() {
+          _colorizedText = [];
+        });
+        RegExp exp = RegExp(_regexController.text,
             multiLine: multiline,
             caseSensitive: caseSensitive,
             dotAll: doAll,
             unicode: unicode);
-
-        while (exp.hasMatch(markdown)) {
-          var firstMatch = exp.firstMatch(markdown);
-          if (firstMatch!.start != 0) {
-            finalResult
-                .add(_buildText(text: markdown.substring(0, firstMatch.start)));
+        while (exp.hasMatch(testText)) {
+          var firstMatch = exp.firstMatch(testText);
+          if (firstMatch!.start == firstMatch.end) {
+            return;
           }
-          finalResult.add(_buildText(text: firstMatch[0]!, colorized: true));
-          markdown = markdown.substring(firstMatch.end);
+          if (firstMatch.start != 0) {
+            _colorizedText
+                .add(_buildText(text: testText.substring(0, firstMatch.start)));
+            _colorizedText.add(const SizedBox(
+              width: 5,
+            ));
+          }
+          _colorizedText.add(_buildText(text: firstMatch[0]!, colorized: true));
+          _colorizedText.add(const SizedBox(
+            width: 5,
+          ));
+
+          testText = testText.substring(firstMatch.end);
         }
-        if (markdown.isNotEmpty) {
-          finalResult
-              .add(_buildText(text: markdown.substring(0, markdown.length)));
+        if (testText.isNotEmpty) {
+          _colorizedText
+              .add(_buildText(text: testText.substring(0, testText.length)));
+          _colorizedText.add(const SizedBox(
+            width: 5,
+          ));
         }
+        setState(() {
+          _colorizedText = [..._colorizedText];
+        });
       }
     } catch (err) {}
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-            width: 1, color: Theme.of(context).colorScheme.onBackground),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                child: Wrap(
-                  children: finalResult,
+  }
+
+  _loadColorizedText() {
+    return Column(
+      children: [
+        const Text("Result"),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                  width: 1, color: Theme.of(context).colorScheme.onBackground),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      child: Wrap(
+                        children: _colorizedText,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                PopupMenuButton<int>(
+                  icon: const Icon(Icons.menu),
+                  position: PopupMenuPosition.under,
+                  itemBuilder: (BuildContext ctx) {
+                    return [
+                      PopupMenuItem<int>(
+                        onTap: () async {
+                          final hightlightedText =
+                              _matches.map((e) => e).toList().join(",");
+                          _copiedToClipboardSnackbar(context);
+                          await Clipboard.setData(
+                              ClipboardData(text: hightlightedText));
+                        },
+                        child: const Row(
+                          children: [
+                            Icon(Icons.copy),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("Copy highlighted text as CSV"),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem<int>(
+                        onTap: () async {
+                          final hightlightedText =
+                              _matches.map((e) => e).toList();
+                          _copiedToClipboardSnackbar(context);
+                          await Clipboard.setData(ClipboardData(
+                              text: jsonEncode(hightlightedText)));
+                        },
+                        child: const Row(
+                          children: [
+                            Icon(Icons.copy),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("Copy highlighted text as JSON"),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      PopupMenuItem<int>(
+                        onTap: () async {
+                          final notHightlightedText = _testText
+                              .split(RegExp(_regexController.text))
+                              .join(",");
+                          _copiedToClipboardSnackbar(context);
+                          await Clipboard.setData(
+                              ClipboardData(text: notHightlightedText));
+                        },
+                        child: const Row(
+                          children: [
+                            Icon(Icons.copy),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("Copy not highlighted text as CSV"),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem<int>(
+                        onTap: () async {
+                          final notHightlightedText =
+                              _testText.split(RegExp(_regexController.text));
+                          _copiedToClipboardSnackbar(context);
+                          await Clipboard.setData(ClipboardData(
+                              text: jsonEncode(notHightlightedText)));
+                        },
+                        child: const Row(
+                          children: [
+                            Icon(Icons.copy),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("Copy not highlighted text as JSON"),
+                          ],
+                        ),
+                      )
+                    ];
+                  },
+                ),
+              ],
             ),
           ),
-          PopupMenuButton<int>(
-            icon: Icon(Icons.menu),
-            position: PopupMenuPosition.under,
-            itemBuilder: (BuildContext ctx) {
-              return [
-                PopupMenuItem<int>(
-                  onTap: () async {
-                    final hightlightedText =
-                        _matches.map((e) => e).toList().join(",");
-
-                    await Clipboard.setData(
-                        ClipboardData(text: hightlightedText));
-                  },
-                  child: const Row(
-                    children: [
-                      Icon(Icons.copy),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text("Copy highlighted text as CSV"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<int>(
-                  onTap: () async {
-                    final hightlightedText = _matches.map((e) => e).toList();
-
-                    await Clipboard.setData(
-                        ClipboardData(text: jsonEncode(hightlightedText)));
-                  },
-                  child: const Row(
-                    children: [
-                      Icon(Icons.copy),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text("Copy highlighted text as JSON"),
-                    ],
-                  ),
-                ),
-                PopupMenuDivider(),
-                PopupMenuItem<int>(
-                  onTap: () async {
-                    final notHightlightedText =
-                        _testText.split(RegExp(_regex)).join(",");
-
-                    await Clipboard.setData(
-                        ClipboardData(text: notHightlightedText));
-                  },
-                  child: const Row(
-                    children: [
-                      Icon(Icons.copy),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text("Copy not highlighted text as CSV"),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<int>(
-                  onTap: () async {
-                    final notHightlightedText = _testText.split(RegExp(_regex));
-
-                    await Clipboard.setData(
-                        ClipboardData(text: jsonEncode(notHightlightedText)));
-                  },
-                  child: const Row(
-                    children: [
-                      Icon(Icons.copy),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text("Copy not highlighted text as JSON"),
-                    ],
-                  ),
-                )
-              ];
-            },
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -203,7 +246,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     return Text(
       text,
       style: TextStyle(
-        color: colorized ? Colors.green : null,
+        color: colorized ? Colors.deepOrange : null,
         fontSize: colorized ? 16 : null,
       ),
     );
@@ -220,16 +263,34 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               _selectedIndex = value;
             });
           },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.colorize), label: "Match"),
-            BottomNavigationBarItem(icon: Icon(Icons.list), label: "List"),
+          items: [
             BottomNavigationBarItem(
-                icon: Icon(Icons.find_replace), label: "Replace"),
+              icon: Icon(
+                Icons.colorize,
+                color: _selectedIndex == 0 ? Colors.deepPurple : null,
+              ),
+              label: "Match",
+            ),
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.list,
+                  color: _selectedIndex == 1 ? Colors.deepPurple : null,
+                ),
+                label: "List"),
+            BottomNavigationBarItem(
+                icon: Icon(
+                  Icons.find_replace,
+                  color: _selectedIndex == 2 ? Colors.deepPurple : null,
+                ),
+                label: "Replace"),
           ]),
       appBar: AppBar(
         title: Row(
           children: [
             Image.asset("assets/images/icon.png", width: 32),
+            const SizedBox(
+              width: 10,
+            ),
             const Text("Regex Craftsman"),
           ],
         ),
@@ -248,237 +309,260 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           ),
         ],
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          TextField(
-            onChanged: (value) {
-              setState(() {
-                _regex = value;
+      body: Container(
+        padding: const EdgeInsets.only(right: 20, left: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            TextField(
+              onChanged: (value) {
                 _evaluate();
-              });
-            },
-            decoration: InputDecoration(
-              hintText: "Your regular expression",
-              alignLabelWithHint: true,
-              isDense: true,
-              prefixIcon: const Padding(
-                padding: EdgeInsets.only(right: 10, left: 10),
-                child: Icon(Icons.code),
-              ),
-              suffixIcon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.save),
-                  ),
-                  PopupMenuButton<int>(
-                      position: PopupMenuPosition.under,
-                      icon: const Icon(Icons.menu),
-                      itemBuilder: (BuildContext ctx) {
-                        return [
-                          PopupMenuItem<int>(
+              },
+              controller: _regexController,
+              decoration: InputDecoration(
+                hintText: "Your regular expression",
+                alignLabelWithHint: true,
+                isDense: true,
+                prefixIcon: PopupMenuButton(
+                  icon: Icon(Icons.arrow_drop_down),
+                  itemBuilder: (context) {
+                    return [
+                      ...communityRegex.map((e) => PopupMenuItem(
+                            child: Text(
+                              e["name"]!,
+                            ),
                             onTap: () {
-                              setState(() {
-                                multiline = !multiline;
-                                _evaluate();
-                              });
+                              _regexController.text = e["regex"] as String;
                             },
-                            child: Row(
-                              children: [
-                                Icon(multiline
-                                    ? Icons.check_box_outlined
-                                    : Icons.check_box_outline_blank),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                const Text("Multiline")
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem<int>(
-                            onTap: () {
-                              setState(() {
-                                caseSensitive = !caseSensitive;
-                                _evaluate();
-                              });
-                            },
-                            child: Row(
-                              children: [
-                                Icon(caseSensitive
-                                    ? Icons.check_box_outlined
-                                    : Icons.check_box_outline_blank),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                const Text("Case sensitive")
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem<int>(
-                            onTap: () {
-                              setState(() {
-                                unicode = !unicode;
-                                _evaluate();
-                              });
-                            },
-                            child: Row(
-                              children: [
-                                Icon(unicode
-                                    ? Icons.check_box_outlined
-                                    : Icons.check_box_outline_blank),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                const Text("Unicode")
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem<int>(
-                            onTap: () {
-                              setState(() {
-                                doAll = !doAll;
-                                _evaluate();
-                              });
-                            },
-                            child: Row(
-                              children: [
-                                Icon(doAll
-                                    ? Icons.check_box_outlined
-                                    : Icons.check_box_outline_blank),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                const Text("Do all")
-                              ],
-                            ),
-                          ),
-                          PopupMenuDivider(),
-                          PopupMenuItem<int>(
-                            onTap: () async {
-                              await Clipboard.setData(
-                                  ClipboardData(text: _regex));
-                            },
-                            child: const Row(
-                              children: [
-                                Icon(Icons.copy),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text("Copy to clipboard")
-                              ],
-                            ),
-                          ),
-                        ];
-                      }),
-                ],
-              ),
-              label: const Text("Regex"),
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TextField(
-            onChanged: (value) {
-              setState(() {
-                _testText = value;
-                _evaluate();
-              });
-            },
-            decoration: const InputDecoration(
-                prefixIcon: Padding(
-                  padding: EdgeInsets.only(left: 10, right: 10),
-                  child: Icon(Icons.text_fields),
+                          ))
+                    ];
+                  },
                 ),
-                label: Text("Test text"),
-                border: OutlineInputBorder(
-                    borderSide: BorderSide(width: 1, color: Colors.black),
-                    borderRadius: BorderRadius.all(Radius.circular(4)))),
-            maxLines: 4,
-            keyboardType: TextInputType.multiline,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          if (_selectedIndex == 1)
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white, width: 2)),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Expanded(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        primary: true,
-                        itemCount: _matches.length,
-                        itemBuilder: (context, index) {
-                          return Card(
-                            child: ListTile(title: Text("${_matches[index]}")),
-                          );
-                        },
-                      ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.save),
                     ),
                     PopupMenuButton<int>(
-                      icon: Icon(Icons.menu),
-                      position: PopupMenuPosition.under,
-                      itemBuilder: (BuildContext ctx) {
-                        return [
-                          PopupMenuItem<int>(
-                            onTap: () async {
-                              final hightlightedText =
-                                  _matches.map((e) => e).toList().join(",");
-
-                              await Clipboard.setData(
-                                  ClipboardData(text: hightlightedText));
-                            },
-                            child: const Row(
-                              children: [
-                                Icon(Icons.copy),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text("Copy list as CSV"),
-                              ],
+                        position: PopupMenuPosition.under,
+                        icon: const Icon(Icons.menu),
+                        itemBuilder: (BuildContext ctx) {
+                          return [
+                            PopupMenuItem<int>(
+                              onTap: () {
+                                setState(() {
+                                  multiline = !multiline;
+                                  _evaluate();
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(multiline
+                                      ? Icons.check_box_outlined
+                                      : Icons.check_box_outline_blank),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  const Text("Multiline")
+                                ],
+                              ),
                             ),
-                          ),
-                          PopupMenuDivider(),
-                          PopupMenuItem<int>(
-                            onTap: () async {
-                              final hightlightedText =
-                                  _matches.map((e) => e).toList();
-
-                              await Clipboard.setData(ClipboardData(
-                                  text: jsonEncode(hightlightedText)));
-                            },
-                            child: const Row(
-                              children: [
-                                Icon(Icons.copy),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text("Copy list as JSON"),
-                              ],
+                            PopupMenuItem<int>(
+                              onTap: () {
+                                setState(() {
+                                  caseSensitive = !caseSensitive;
+                                  _evaluate();
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(caseSensitive
+                                      ? Icons.check_box_outlined
+                                      : Icons.check_box_outline_blank),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  const Text("Case sensitive")
+                                ],
+                              ),
                             ),
-                          ),
-                        ];
-                      },
+                            PopupMenuItem<int>(
+                              onTap: () {
+                                setState(() {
+                                  unicode = !unicode;
+                                  _evaluate();
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(unicode
+                                      ? Icons.check_box_outlined
+                                      : Icons.check_box_outline_blank),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  const Text("Unicode")
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem<int>(
+                              onTap: () {
+                                setState(() {
+                                  doAll = !doAll;
+                                  _evaluate();
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(doAll
+                                      ? Icons.check_box_outlined
+                                      : Icons.check_box_outline_blank),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  const Text("Do all")
+                                ],
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                            PopupMenuItem<int>(
+                              onTap: () async {
+                                _copiedToClipboardSnackbar(context);
+                                await Clipboard.setData(
+                                    ClipboardData(text: _regexController.text));
+                              },
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.copy),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text("Copy to clipboard")
+                                ],
+                              ),
+                            ),
+                          ];
+                        }),
+                  ],
+                ),
+                label: const Text("Regex"),
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextField(
+              onChanged: (value) {
+                setState(() {
+                  _testText = value;
+                  _evaluate();
+                });
+              },
+              decoration: const InputDecoration(
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                    child: Icon(Icons.text_fields),
+                  ),
+                  label: Text("Test text"),
+                  border: OutlineInputBorder(
+                      borderSide: BorderSide(width: 1, color: Colors.black),
+                      borderRadius: BorderRadius.all(Radius.circular(4)))),
+              maxLines: 4,
+              keyboardType: TextInputType.multiline,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            if (_selectedIndex == 1)
+              Expanded(
+                child: Column(
+                  children: [
+                    const Text("Result"),
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white, width: 2)),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                primary: true,
+                                itemCount: _matches.length,
+                                itemBuilder: (context, index) {
+                                  return Card(
+                                    child:
+                                        ListTile(title: Text(_matches[index])),
+                                  );
+                                },
+                              ),
+                            ),
+                            PopupMenuButton<int>(
+                              icon: const Icon(Icons.menu),
+                              position: PopupMenuPosition.under,
+                              itemBuilder: (BuildContext ctx) {
+                                return [
+                                  PopupMenuItem<int>(
+                                    onTap: () async {
+                                      final hightlightedText = _matches
+                                          .map((e) => e)
+                                          .toList()
+                                          .join(",");
+                                      _copiedToClipboardSnackbar(context);
+                                      await Clipboard.setData(ClipboardData(
+                                          text: hightlightedText));
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.copy),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text("Copy list as CSV"),
+                                      ],
+                                    ),
+                                  ),
+                                  const PopupMenuDivider(),
+                                  PopupMenuItem<int>(
+                                    onTap: () async {
+                                      final hightlightedText =
+                                          _matches.map((e) => e).toList();
+                                      _copiedToClipboardSnackbar(context);
+                                      await Clipboard.setData(ClipboardData(
+                                          text: jsonEncode(hightlightedText)));
+                                    },
+                                    child: const Row(
+                                      children: [
+                                        Icon(Icons.copy),
+                                        SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text("Copy list as JSON"),
+                                      ],
+                                    ),
+                                  ),
+                                ];
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          if (_selectedIndex == 0)
-            Expanded(
-              child: _loadColorizedText(),
-            ),
-          if (_selectedIndex == 2) _printReplaceForm()
-        ],
+            if (_selectedIndex == 0)
+              Expanded(
+                child: _loadColorizedText(),
+              ),
+            if (_selectedIndex == 2) _printReplaceForm()
+          ],
+        ),
       ),
     );
   }
@@ -490,14 +574,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           height: 10,
         ),
         TextField(
-          onChanged: (value) {
-            if (value.isEmpty || _regex.isEmpty || _testText.isEmpty) {
-              return;
-            }
-            setState(() {
-              _textReplaced = _testText.replaceAll(RegExp(_regex!), value);
-            });
-          },
+          onChanged: _processReplaceWith,
+          controller: _replaceWithController,
           decoration: const InputDecoration(
               prefixIcon: Padding(
                 padding: EdgeInsets.only(left: 10, right: 10),
@@ -511,17 +589,15 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         const SizedBox(
           height: 10,
         ),
-        const Text("Replaced text"),
+        const Text("Result"),
         const SizedBox(
           height: 10,
         ),
         Expanded(
           child: InkWell(
             onTap: () async {
+              _copiedToClipboardSnackbar(context);
               await Clipboard.setData(ClipboardData(text: _textReplaced));
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Copied to clipboard!")));
             },
             child: Container(
               decoration: BoxDecoration(
@@ -543,6 +619,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       return [
                         PopupMenuItem(
                           onTap: () async {
+                            _copiedToClipboardSnackbar(context);
                             await Clipboard.setData(
                                 ClipboardData(text: _textReplaced));
                           },
@@ -566,5 +643,21 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         ),
       ]),
     );
+  }
+
+  void _copiedToClipboardSnackbar(BuildContext context) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Copied to clipboard!")));
+  }
+
+  void _processReplaceWith(_) {
+    if (_regexController.text.isEmpty || _testText.isEmpty) {
+      return;
+    }
+    setState(() {
+      _textReplaced = _testText.replaceAll(
+          RegExp(_regexController.text), _replaceWithController.text);
+    });
   }
 }
