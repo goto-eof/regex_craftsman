@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:regex_craftsman/regex_craftsman.dart';
-import 'package:regex_craftsman/regex_craftsman_old.dart';
 
 final theme = ThemeData(
   useMaterial3: true,

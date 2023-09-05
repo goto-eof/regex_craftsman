@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -130,7 +132,24 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       SizedBox(
                         width: 5,
                       ),
-                      Text("Copy highlighted text"),
+                      Text("Copy highlighted text as CSV"),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  onTap: () async {
+                    final hightlightedText = _matches.map((e) => e).toList();
+
+                    await Clipboard.setData(
+                        ClipboardData(text: jsonEncode(hightlightedText)));
+                  },
+                  child: const Row(
+                    children: [
+                      Icon(Icons.copy),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text("Copy highlighted text as JSON"),
                     ],
                   ),
                 ),
@@ -148,7 +167,24 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       SizedBox(
                         width: 5,
                       ),
-                      Text("Copy not highlighted text"),
+                      Text("Copy not highlighted text as CSV"),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  onTap: () async {
+                    final notHightlightedText = _testText.split(RegExp(_regex));
+
+                    await Clipboard.setData(
+                        ClipboardData(text: jsonEncode(notHightlightedText)));
+                  },
+                  child: const Row(
+                    children: [
+                      Icon(Icons.copy),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text("Copy not highlighted text as JSON"),
                     ],
                   ),
                 )
@@ -315,6 +351,21 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                               ],
                             ),
                           ),
+                          PopupMenuItem(
+                            onTap: () async {
+                              await Clipboard.setData(
+                                  ClipboardData(text: _regex));
+                            },
+                            child: const Row(
+                              children: [
+                                Icon(Icons.copy),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text("Copy to clipboard")
+                              ],
+                            ),
+                          ),
                         ];
                       }),
                 ],
@@ -353,15 +404,67 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               child: Container(
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.white, width: 2)),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  primary: true,
-                  itemCount: _matches.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      child: ListTile(title: Text("${_matches[index]}")),
-                    );
-                  },
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        primary: true,
+                        itemCount: _matches.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: ListTile(title: Text("${_matches[index]}")),
+                          );
+                        },
+                      ),
+                    ),
+                    PopupMenuButton(
+                      icon: Icon(Icons.menu),
+                      position: PopupMenuPosition.under,
+                      itemBuilder: (BuildContext ctx) {
+                        return [
+                          PopupMenuItem(
+                            onTap: () async {
+                              final hightlightedText =
+                                  _matches.map((e) => e).toList().join(",");
+
+                              await Clipboard.setData(
+                                  ClipboardData(text: hightlightedText));
+                            },
+                            child: const Row(
+                              children: [
+                                Icon(Icons.copy),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text("Copy list as CSV"),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            onTap: () async {
+                              final hightlightedText =
+                                  _matches.map((e) => e).toList();
+
+                              await Clipboard.setData(ClipboardData(
+                                  text: jsonEncode(hightlightedText)));
+                            },
+                            child: const Row(
+                              children: [
+                                Icon(Icons.copy),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text("Copy list as JSON"),
+                              ],
+                            ),
+                          ),
+                        ];
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -379,7 +482,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     return Expanded(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         const SizedBox(
-          height: 0,
+          height: 10,
         ),
         TextField(
           onChanged: (value) {
@@ -403,6 +506,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         const SizedBox(
           height: 10,
         ),
+        const Text("Replaced text"),
+        const SizedBox(
+          height: 10,
+        ),
         Expanded(
           child: InkWell(
             onTap: () async {
@@ -414,9 +521,40 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             child: Container(
               decoration: BoxDecoration(
                   border: Border.all(color: Colors.white, width: 2)),
-              child: SingleChildScrollView(
-                child: SizedBox(
-                    width: double.infinity, child: Text(_textReplaced)),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: SizedBox(
+                          width: double.infinity, child: Text(_textReplaced)),
+                    ),
+                  ),
+                  PopupMenuButton(
+                    icon: Icon(Icons.menu),
+                    position: PopupMenuPosition.under,
+                    itemBuilder: (BuildContext ctx) {
+                      return [
+                        PopupMenuItem(
+                          onTap: () async {
+                            await Clipboard.setData(
+                                ClipboardData(text: _textReplaced));
+                          },
+                          child: const Row(
+                            children: [
+                              Icon(Icons.copy),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text("Copy to clipboard"),
+                            ],
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
+                ],
               ),
             ),
           ),
