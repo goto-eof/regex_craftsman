@@ -1,10 +1,9 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:regex_craftsman/regex_craftsman.dart';
-import 'package:window_manager/window_manager.dart';
+import 'package:regex_craftsman/regex_craftsman_old.dart';
 
 final theme = ThemeData(
   useMaterial3: true,
@@ -26,7 +25,6 @@ final themeDark = ThemeData(
 );
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
   if (Platform.isLinux) {}
   runApp(MaterialApp(
     theme: theme,
