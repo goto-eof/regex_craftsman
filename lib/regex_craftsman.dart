@@ -200,7 +200,13 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       PopupMenuItem<int>(
                         onTap: () async {
                           final notHightlightedText = _testText
-                              .split(RegExp(_regexController.text))
+                              .split(
+                                RegExp(_regexController.text,
+                                    multiLine: multiline,
+                                    caseSensitive: caseSensitive,
+                                    dotAll: doAll,
+                                    unicode: unicode),
+                              )
                               .join(",");
                           _copiedToClipboardSnackbar(context);
                           await Clipboard.setData(
@@ -218,8 +224,12 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       ),
                       PopupMenuItem<int>(
                         onTap: () async {
-                          final notHightlightedText =
-                              _testText.split(RegExp(_regexController.text));
+                          final notHightlightedText = _testText.split(RegExp(
+                              _regexController.text,
+                              multiLine: multiline,
+                              caseSensitive: caseSensitive,
+                              dotAll: doAll,
+                              unicode: unicode));
                           _copiedToClipboardSnackbar(context);
                           await Clipboard.setData(ClipboardData(
                               text: jsonEncode(notHightlightedText)));
@@ -671,7 +681,12 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     }
     setState(() {
       _textReplaced = _testText.replaceAll(
-          RegExp(_regexController.text), _replaceWithController.text);
+          RegExp(_regexController.text,
+              multiLine: multiline,
+              caseSensitive: caseSensitive,
+              dotAll: doAll,
+              unicode: unicode),
+          _replaceWithController.text);
     });
   }
 }
