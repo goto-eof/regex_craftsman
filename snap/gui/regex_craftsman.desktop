@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Regex Craftsman
 Comment=Play with regex
-Exec=regex_craftsman
+Exec=regex-craftsman
 Icon=${SNAP}/meta/gui/icon.png
 Terminal=false
 Type=Application
