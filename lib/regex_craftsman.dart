@@ -36,10 +36,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   @override
   void initState() {
     super.initState();
-    _loadCommunityRegex();
+    _loadCommunityRegexFromJSON();
   }
 
-  Future<void> _loadCommunityRegex() async {
+  Future<void> _loadCommunityRegexFromJSON() async {
     final String response =
         await rootBundle.loadString('assets/data/community_regex.json');
     final communityRegexData =
@@ -99,13 +99,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             return;
           }
           if (firstMatch.start != 0) {
-            _colorizedText
-                .add(_buildText(text: testText.substring(0, firstMatch.start)));
+            _colorizedText.add(
+                _buildMatchText(text: testText.substring(0, firstMatch.start)));
             _colorizedText.add(const SizedBox(
               width: 5,
             ));
           }
-          _colorizedText.add(_buildText(text: firstMatch[0]!, colorized: true));
+          _colorizedText
+              .add(_buildMatchText(text: firstMatch[0]!, colorized: true));
           _colorizedText.add(const SizedBox(
             width: 5,
           ));
@@ -113,8 +114,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           testText = testText.substring(firstMatch.end);
         }
         if (testText.isNotEmpty) {
-          _colorizedText
-              .add(_buildText(text: testText.substring(0, testText.length)));
+          _colorizedText.add(
+              _buildMatchText(text: testText.substring(0, testText.length)));
           _colorizedText.add(const SizedBox(
             width: 5,
           ));
@@ -164,7 +165,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                         onTap: () async {
                           final hightlightedText =
                               _matches.map((e) => e).toList().join(",");
-                          _copiedToClipboardSnackbar(context);
+                          _showCopyDoneSnackbarMessage(context);
                           await Clipboard.setData(
                               ClipboardData(text: hightlightedText));
                         },
@@ -182,7 +183,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                         onTap: () async {
                           final hightlightedText =
                               _matches.map((e) => e).toList();
-                          _copiedToClipboardSnackbar(context);
+                          _showCopyDoneSnackbarMessage(context);
                           await Clipboard.setData(ClipboardData(
                               text: jsonEncode(hightlightedText)));
                         },
@@ -208,7 +209,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                                     unicode: unicode),
                               )
                               .join(",");
-                          _copiedToClipboardSnackbar(context);
+                          _showCopyDoneSnackbarMessage(context);
                           await Clipboard.setData(
                               ClipboardData(text: notHightlightedText));
                         },
@@ -230,7 +231,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                               caseSensitive: caseSensitive,
                               dotAll: doAll,
                               unicode: unicode));
-                          _copiedToClipboardSnackbar(context);
+                          _showCopyDoneSnackbarMessage(context);
                           await Clipboard.setData(ClipboardData(
                               text: jsonEncode(notHightlightedText)));
                         },
@@ -255,7 +256,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     );
   }
 
-  _buildText({String text = "test", colorized = false}) {
+  _buildMatchText({String text = "test", colorized = false}) {
     return Text(
       text,
       style: TextStyle(
@@ -263,6 +264,103 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         fontSize: colorized ? 16 : null,
       ),
     );
+  }
+
+  Widget _printReplaceForm() {
+    return Expanded(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const SizedBox(
+          height: 10,
+        ),
+        TextField(
+          onChanged: _processReplaceWith,
+          controller: _replaceWithController,
+          decoration: const InputDecoration(
+              prefixIcon: Padding(
+                padding: EdgeInsets.only(left: 10, right: 10),
+                child: Icon(Icons.text_fields),
+              ),
+              label: Text("Replace with"),
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(width: 1, color: Colors.black),
+                  borderRadius: BorderRadius.all(Radius.circular(4)))),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        const Padding(
+          padding: EdgeInsets.all(20),
+          child: Text("Replace Result"),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+                border: Border.all(color: Colors.white, width: 2)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: SizedBox(
+                        width: double.infinity, child: Text(_textReplaced)),
+                  ),
+                ),
+                PopupMenuButton(
+                  tooltip: "Copy to clipboard",
+                  icon: const Icon(Icons.copy),
+                  position: PopupMenuPosition.under,
+                  itemBuilder: (BuildContext ctx) {
+                    return [
+                      PopupMenuItem(
+                        onTap: () async {
+                          _showCopyDoneSnackbarMessage(context);
+                          await Clipboard.setData(
+                              ClipboardData(text: _textReplaced));
+                        },
+                        child: const Row(
+                          children: [
+                            Icon(Icons.copy),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("Copy to clipboard"),
+                          ],
+                        ),
+                      ),
+                    ];
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  void _showCopyDoneSnackbarMessage(BuildContext context) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Copied to clipboard!")));
+  }
+
+  void _processReplaceWith(_) {
+    if (_regexController.text.isEmpty || _testText.isEmpty) {
+      return;
+    }
+    setState(() {
+      _textReplaced = _testText.replaceAll(
+          RegExp(_regexController.text,
+              multiLine: multiline,
+              caseSensitive: caseSensitive,
+              dotAll: doAll,
+              unicode: unicode),
+          _replaceWithController.text);
+    });
   }
 
   @override
@@ -451,7 +549,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                             const PopupMenuDivider(),
                             PopupMenuItem<int>(
                               onTap: () async {
-                                _copiedToClipboardSnackbar(context);
+                                _showCopyDoneSnackbarMessage(context);
                                 await Clipboard.setData(
                                     ClipboardData(text: _regexController.text));
                               },
@@ -539,7 +637,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                                           .map((e) => e)
                                           .toList()
                                           .join(",");
-                                      _copiedToClipboardSnackbar(context);
+                                      _showCopyDoneSnackbarMessage(context);
                                       await Clipboard.setData(ClipboardData(
                                           text: hightlightedText));
                                     },
@@ -558,7 +656,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                                     onTap: () async {
                                       final hightlightedText =
                                           _matches.map((e) => e).toList();
-                                      _copiedToClipboardSnackbar(context);
+                                      _showCopyDoneSnackbarMessage(context);
                                       await Clipboard.setData(ClipboardData(
                                           text: jsonEncode(hightlightedText)));
                                     },
@@ -591,102 +689,5 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         ),
       ),
     );
-  }
-
-  Widget _printReplaceForm() {
-    return Expanded(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const SizedBox(
-          height: 10,
-        ),
-        TextField(
-          onChanged: _processReplaceWith,
-          controller: _replaceWithController,
-          decoration: const InputDecoration(
-              prefixIcon: Padding(
-                padding: EdgeInsets.only(left: 10, right: 10),
-                child: Icon(Icons.text_fields),
-              ),
-              label: Text("Replace with"),
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(width: 1, color: Colors.black),
-                  borderRadius: BorderRadius.all(Radius.circular(4)))),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        const Padding(
-          padding: EdgeInsets.all(20),
-          child: Text("Replace Result"),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 2)),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: SizedBox(
-                        width: double.infinity, child: Text(_textReplaced)),
-                  ),
-                ),
-                PopupMenuButton(
-                  tooltip: "Copy to clipboard",
-                  icon: const Icon(Icons.copy),
-                  position: PopupMenuPosition.under,
-                  itemBuilder: (BuildContext ctx) {
-                    return [
-                      PopupMenuItem(
-                        onTap: () async {
-                          _copiedToClipboardSnackbar(context);
-                          await Clipboard.setData(
-                              ClipboardData(text: _textReplaced));
-                        },
-                        child: const Row(
-                          children: [
-                            Icon(Icons.copy),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text("Copy to clipboard"),
-                          ],
-                        ),
-                      ),
-                    ];
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ]),
-    );
-  }
-
-  void _copiedToClipboardSnackbar(BuildContext context) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Copied to clipboard!")));
-  }
-
-  void _processReplaceWith(_) {
-    if (_regexController.text.isEmpty || _testText.isEmpty) {
-      return;
-    }
-    setState(() {
-      _textReplaced = _testText.replaceAll(
-          RegExp(_regexController.text,
-              multiLine: multiline,
-              caseSensitive: caseSensitive,
-              dotAll: doAll,
-              unicode: unicode),
-          _replaceWithController.text);
-    });
   }
 }
