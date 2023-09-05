@@ -1,0 +1,29 @@
+name: Regex Craftsman
+version: '0.1.0'
+summary: Play with regex.
+description: Play with regular expressions.
+
+base: core22
+confinement: strict
+grade: stable
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  regex_craftsman:
+    command: regex_craftsman
+    extensions: [gnome]
+    plugs: [network, network-bind, home]
+
+parts:
+  zenity-integration:
+    plugin: nil
+    stage-snaps:
+      - zenity-integration
+  regex_craftsman:
+    build-packages: [curl]
+    source: .
+    plugin: flutter
+    flutter-target: lib/main.dart
