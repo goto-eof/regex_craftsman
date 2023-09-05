@@ -298,17 +298,20 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           ],
         ),
         actions: [
-          IconButton(
-            tooltip: "About this application",
-            onPressed: () {
-              PackageInfo.fromPlatform().then((value) => showDialog(
-                  context: context,
-                  builder: (ctx) {
-                    return _aboutDialogBuilder(ctx, value.version);
-                  }));
-            },
-            icon: const Icon(
-              Icons.help,
+          Container(
+            padding: const EdgeInsets.all(10),
+            child: IconButton(
+              tooltip: "About this application",
+              onPressed: () {
+                PackageInfo.fromPlatform().then((value) => showDialog(
+                    context: context,
+                    builder: (ctx) {
+                      return _aboutDialogBuilder(ctx, value.version);
+                    }));
+              },
+              icon: const Icon(
+                Icons.help,
+              ),
             ),
           ),
         ],
@@ -601,51 +604,45 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           height: 10,
         ),
         Expanded(
-          child: InkWell(
-            onTap: () async {
-              _copiedToClipboardSnackbar(context);
-              await Clipboard.setData(ClipboardData(text: _textReplaced));
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 2)),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: SizedBox(
-                          width: double.infinity, child: Text(_textReplaced)),
-                    ),
+          child: Container(
+            decoration: BoxDecoration(
+                border: Border.all(color: Colors.white, width: 2)),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: SizedBox(
+                        width: double.infinity, child: Text(_textReplaced)),
                   ),
-                  PopupMenuButton(
-                    tooltip: "Copy to clipboard",
-                    icon: const Icon(Icons.copy),
-                    position: PopupMenuPosition.under,
-                    itemBuilder: (BuildContext ctx) {
-                      return [
-                        PopupMenuItem(
-                          onTap: () async {
-                            _copiedToClipboardSnackbar(context);
-                            await Clipboard.setData(
-                                ClipboardData(text: _textReplaced));
-                          },
-                          child: const Row(
-                            children: [
-                              Icon(Icons.copy),
-                              SizedBox(
-                                width: 5,
-                              ),
-                              Text("Copy to clipboard"),
-                            ],
-                          ),
+                ),
+                PopupMenuButton(
+                  tooltip: "Copy to clipboard",
+                  icon: const Icon(Icons.copy),
+                  position: PopupMenuPosition.under,
+                  itemBuilder: (BuildContext ctx) {
+                    return [
+                      PopupMenuItem(
+                        onTap: () async {
+                          _copiedToClipboardSnackbar(context);
+                          await Clipboard.setData(
+                              ClipboardData(text: _textReplaced));
+                        },
+                        child: const Row(
+                          children: [
+                            Icon(Icons.copy),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("Copy to clipboard"),
+                          ],
                         ),
-                      ];
-                    },
-                  ),
-                ],
-              ),
+                      ),
+                    ];
+                  },
+                ),
+              ],
             ),
           ),
         ),
