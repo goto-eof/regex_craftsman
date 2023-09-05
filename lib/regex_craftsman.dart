@@ -65,7 +65,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     } catch (err) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              "Something went wrong when trying to parse the regex: ${err}")));
+              "Something went wrong when trying to parse the regex: $err")));
     }
   }
 
