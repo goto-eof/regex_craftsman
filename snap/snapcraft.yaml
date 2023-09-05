@@ -1,7 +1,7 @@
 name: Regex Craftsman
 version: '0.1.0'
-summary: Play with regex.
-description: Play with regular expressions.
+summary: Learn, build and test Regular Expressions (RegEx / RegExp).
+description: Tool to learn, build and test Regular Expressions (RegEx / RegExp).
 
 base: core22
 confinement: strict

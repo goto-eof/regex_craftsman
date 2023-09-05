@@ -64,33 +64,35 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     String markdown = _testText.replaceAll("\r\n", "").replaceAll("\n", "");
     List<Text> finalResult = [];
     try {
-      if (_regex.isEmpty || markdown.isEmpty) {
-        return Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(
-                  width: 1, color: Theme.of(context).colorScheme.onBackground),
-            ),
-            child: const Text("Please fill all fields"));
-      }
-      RegExp exp = RegExp(_regex,
-          multiLine: multiline,
-          caseSensitive: caseSensitive,
-          dotAll: doAll,
-          unicode: unicode);
+      // if (_regex.isEmpty || markdown.isEmpty) {
+      //   return Container(
+      //       width: double.infinity,
+      //       decoration: BoxDecoration(
+      //         border: Border.all(
+      //             width: 1, color: Theme.of(context).colorScheme.onBackground),
+      //       ),
+      //       child: const Text("Please fill all fields"));
+      // }
+      if (_regex.isNotEmpty & markdown.isNotEmpty) {
+        RegExp exp = RegExp(_regex,
+            multiLine: multiline,
+            caseSensitive: caseSensitive,
+            dotAll: doAll,
+            unicode: unicode);
 
-      while (exp.hasMatch(markdown)) {
-        var firstMatch = exp.firstMatch(markdown);
-        if (firstMatch!.start != 0) {
-          finalResult
-              .add(_buildText(text: markdown.substring(0, firstMatch.start)));
+        while (exp.hasMatch(markdown)) {
+          var firstMatch = exp.firstMatch(markdown);
+          if (firstMatch!.start != 0) {
+            finalResult
+                .add(_buildText(text: markdown.substring(0, firstMatch.start)));
+          }
+          finalResult.add(_buildText(text: firstMatch[0]!, colorized: true));
+          markdown = markdown.substring(firstMatch.end);
         }
-        finalResult.add(_buildText(text: firstMatch[0]!, colorized: true));
-        markdown = markdown.substring(firstMatch.end);
-      }
-      if (markdown.isNotEmpty) {
-        finalResult
-            .add(_buildText(text: markdown.substring(0, markdown.length)));
+        if (markdown.isNotEmpty) {
+          finalResult
+              .add(_buildText(text: markdown.substring(0, markdown.length)));
+        }
       }
     } catch (err) {}
     return Container(
@@ -113,12 +115,12 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               ),
             ),
           ),
-          PopupMenuButton(
+          PopupMenuButton<int>(
             icon: Icon(Icons.menu),
             position: PopupMenuPosition.under,
             itemBuilder: (BuildContext ctx) {
               return [
-                PopupMenuItem(
+                PopupMenuItem<int>(
                   onTap: () async {
                     final hightlightedText =
                         _matches.map((e) => e).toList().join(",");
@@ -136,7 +138,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                     ],
                   ),
                 ),
-                PopupMenuItem(
+                PopupMenuItem<int>(
                   onTap: () async {
                     final hightlightedText = _matches.map((e) => e).toList();
 
@@ -153,7 +155,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                     ],
                   ),
                 ),
-                PopupMenuItem(
+                PopupMenuDivider(),
+                PopupMenuItem<int>(
                   onTap: () async {
                     final notHightlightedText =
                         _testText.split(RegExp(_regex)).join(",");
@@ -171,7 +174,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                     ],
                   ),
                 ),
-                PopupMenuItem(
+                PopupMenuItem<int>(
                   onTap: () async {
                     final notHightlightedText = _testText.split(RegExp(_regex));
 
@@ -270,12 +273,12 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                     onPressed: () {},
                     icon: const Icon(Icons.save),
                   ),
-                  PopupMenuButton(
+                  PopupMenuButton<int>(
                       position: PopupMenuPosition.under,
                       icon: const Icon(Icons.menu),
                       itemBuilder: (BuildContext ctx) {
                         return [
-                          PopupMenuItem(
+                          PopupMenuItem<int>(
                             onTap: () {
                               setState(() {
                                 multiline = !multiline;
@@ -294,7 +297,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                               ],
                             ),
                           ),
-                          PopupMenuItem(
+                          PopupMenuItem<int>(
                             onTap: () {
                               setState(() {
                                 caseSensitive = !caseSensitive;
@@ -313,7 +316,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                               ],
                             ),
                           ),
-                          PopupMenuItem(
+                          PopupMenuItem<int>(
                             onTap: () {
                               setState(() {
                                 unicode = !unicode;
@@ -332,7 +335,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                               ],
                             ),
                           ),
-                          PopupMenuItem(
+                          PopupMenuItem<int>(
                             onTap: () {
                               setState(() {
                                 doAll = !doAll;
@@ -351,7 +354,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                               ],
                             ),
                           ),
-                          PopupMenuItem(
+                          PopupMenuDivider(),
+                          PopupMenuItem<int>(
                             onTap: () async {
                               await Clipboard.setData(
                                   ClipboardData(text: _regex));
@@ -420,12 +424,12 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                         },
                       ),
                     ),
-                    PopupMenuButton(
+                    PopupMenuButton<int>(
                       icon: Icon(Icons.menu),
                       position: PopupMenuPosition.under,
                       itemBuilder: (BuildContext ctx) {
                         return [
-                          PopupMenuItem(
+                          PopupMenuItem<int>(
                             onTap: () async {
                               final hightlightedText =
                                   _matches.map((e) => e).toList().join(",");
@@ -443,7 +447,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                               ],
                             ),
                           ),
-                          PopupMenuItem(
+                          PopupMenuDivider(),
+                          PopupMenuItem<int>(
                             onTap: () async {
                               final hightlightedText =
                                   _matches.map((e) => e).toList();
