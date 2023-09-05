@@ -85,12 +85,12 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         _matches = matches.map((e) => e[0]!).toList();
       });
 
-      _resultController.text = "";
-      for (final m in matches) {
-        setState(() {
-          _resultController.text += m[0]!;
-        });
-      }
+      // _resultController.text = "";
+      // for (final m in matches) {
+      //   setState(() {
+      //     _resultController.text += m[0]!;
+      //   });
+      // }
     }
   }
 
@@ -108,40 +108,95 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
 
   void _save() {}
 
-  Widget _buildColorizedText() {
-    String markdown = _testText;
+  // Widget _buildColorizedText() {
+  //   String markdown = _testText;
+  //   try {
+  //     if (_regex == null || _regex!.isEmpty || markdown.isEmpty) {
+  //       return Markdown(data: markdown);
+  //     }
+  //     RegExp exp = RegExp(_regex!,
+  //         multiLine: multiline,
+  //         caseSensitive: caseSensitive,
+  //         dotAll: doAll,
+  //         unicode: unicode);
+  //     Iterable<RegExpMatch> matches = exp.allMatches(markdown);
+
+  //     for (var match in matches) {
+  //       print(match[0]);
+  //       markdown = _testText.replaceAll(match[0]!, "**${match[0]}**");
+  //     }
+  //     print(markdown);
+  //     markdown = markdown.replaceAll("****", "");
+  //   } catch (err) {
+  //     print("Something went wrong!");
+  //   }
+  //   print(markdown);
+  //   return Container(
+  //     width: double.infinity,
+  //     decoration: BoxDecoration(
+  //       border: Border.all(
+  //           width: 1, color: Theme.of(context).colorScheme.onBackground),
+  //     ),
+  //     padding: const EdgeInsets.all(20),
+  //     child: Markdown(
+  //       data: markdown,
+  //       selectable: true,
+  //     ),
+  //   );
+  // }
+
+  _loadColorizedText() {
+    String markdown = _testText.replaceAll("\r\n", "").replaceAll("\n", "");
+    List<Text> finalResult = [];
     try {
       if (_regex == null || _regex!.isEmpty || markdown.isEmpty) {
-        return Markdown(data: markdown);
+        return const Text("Please fill all fields");
       }
       RegExp exp = RegExp(_regex!,
           multiLine: multiline,
           caseSensitive: caseSensitive,
           dotAll: doAll,
           unicode: unicode);
-      Iterable<RegExpMatch> matches = exp.allMatches(markdown);
 
-      for (var match in matches) {
-        print(match[0]);
-        markdown = _testText.replaceAll(match[0]!, "**${match[0]}**");
+      while (exp.hasMatch(markdown)) {
+        var firstMatch = exp.firstMatch(markdown);
+        if (firstMatch!.start != 0) {
+          finalResult
+              .add(_buildText(text: markdown.substring(0, firstMatch.start)));
+        }
+        finalResult.add(_buildText(text: firstMatch[0]!, colorized: true));
+        markdown = markdown.substring(firstMatch.end);
       }
-      print(markdown);
-      markdown = markdown.replaceAll("****", "");
+      if (markdown.isNotEmpty) {
+        finalResult
+            .add(_buildText(text: markdown.substring(0, markdown.length)));
+      }
     } catch (err) {
-      print("Something went wrong!");
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content:
+              Text("Something went wrong when trying to render the result.")));
     }
-    print(markdown);
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: Border.all(
-            width: 1, color: Theme.of(context).colorScheme.onBackground),
+    return Expanded(
+      child: SingleChildScrollView(
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(
+                width: 1, color: Theme.of(context).colorScheme.onBackground),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Wrap(
+            children: finalResult,
+          ),
+        ),
       ),
-      padding: const EdgeInsets.all(20),
-      child: Markdown(
-        data: markdown,
-        selectable: true,
-      ),
+    );
+  }
+
+  _buildText({String text = "test", colorized = false}) {
+    return Text(
+      text,
+      style: TextStyle(color: colorized ? Colors.red : null),
     );
   }
 
@@ -323,7 +378,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 const SizedBox(
                   height: 10,
                 ),
-                if (_selectedIndex == 0) Expanded(child: _buildColorizedText()),
+                if (_selectedIndex == 0) _loadColorizedText(),
                 if (_selectedIndex == 1)
                   Expanded(
                     child: ListView.builder(
