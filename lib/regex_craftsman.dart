@@ -111,7 +111,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   Widget _buildColorizedText() {
     String markdown = _testText;
     try {
-      if (_regex == null || _regex!.isEmpty || _testText.isEmpty) {
+      if (_regex == null || _regex!.isEmpty || markdown.isEmpty) {
         return Markdown(data: markdown);
       }
       RegExp exp = RegExp(_regex!,
@@ -119,12 +119,11 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           caseSensitive: caseSensitive,
           dotAll: doAll,
           unicode: unicode);
-      Iterable<RegExpMatch> matches = exp.allMatches(_testText);
+      Iterable<RegExpMatch> matches = exp.allMatches(markdown);
 
       for (var match in matches) {
         print(match[0]);
-        var splitted = markdown.split(match[0]!);
-        markdown = splitted.join("**${match[0]}**");
+        markdown = _testText.replaceAll(match[0]!, "**${match[0]}**");
       }
       print(markdown);
       markdown = markdown.replaceAll("****", "");
@@ -133,12 +132,15 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     }
     print(markdown);
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        border: Border.all(width: 1, color: Colors.black),
+        border: Border.all(
+            width: 1, color: Theme.of(context).colorScheme.onBackground),
       ),
       padding: const EdgeInsets.all(20),
       child: Markdown(
         data: markdown,
+        selectable: true,
       ),
     );
   }
@@ -154,7 +156,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             });
           },
           items: const [
-            //  BottomNavigationBarItem(icon: Icon(Icons.colorize), label: "Match"),
+            BottomNavigationBarItem(icon: Icon(Icons.colorize), label: "Match"),
             BottomNavigationBarItem(icon: Icon(Icons.list), label: "List"),
             BottomNavigationBarItem(
                 icon: Icon(Icons.find_replace), label: "Replace"),
@@ -321,8 +323,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 const SizedBox(
                   height: 10,
                 ),
-                //  if (_selectedIndex == 0) Expanded(child: _buildColorizedText()),
-                if (_selectedIndex == 0)
+                if (_selectedIndex == 0) Expanded(child: _buildColorizedText()),
+                if (_selectedIndex == 1)
                   Expanded(
                     child: ListView.builder(
                       shrinkWrap: true,
@@ -335,7 +337,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       },
                     ),
                   ),
-                if (_selectedIndex == 1)
+                if (_selectedIndex == 2)
                   Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
@@ -371,7 +373,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       ),
                       TextField(
                         controller: _resultController,
-                        maxLines: 6,
+                        maxLines: 4,
                         decoration: const InputDecoration(
                             prefixIcon: Padding(
                               padding: EdgeInsets.only(left: 10, right: 10),
