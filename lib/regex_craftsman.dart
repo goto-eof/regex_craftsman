@@ -129,7 +129,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   _loadColorizedText() {
     return Column(
       children: [
-        const Text("Match Result"),
+        const Padding(
+          padding: EdgeInsets.all(20),
+          child: Text("Match Result"),
+        ),
         Expanded(
           child: Container(
             decoration: BoxDecoration(
@@ -489,7 +492,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               Expanded(
                 child: Column(
                   children: [
-                    const Text("List Result"),
+                    const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text("List Result"),
+                    ),
                     Expanded(
                       child: Container(
                         decoration: BoxDecoration(
@@ -599,7 +605,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         const SizedBox(
           height: 10,
         ),
-        const Text("Replace Result"),
+        const Padding(
+          padding: EdgeInsets.all(20),
+          child: Text("Replace Result"),
+        ),
         const SizedBox(
           height: 10,
         ),
