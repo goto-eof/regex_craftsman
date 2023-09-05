@@ -341,10 +341,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.save),
-                    ),
+                    // IconButton(
+                    //   onPressed: () {},
+                    //   icon: const Icon(Icons.save),
+                    // ),
                     PopupMenuButton<int>(
                         position: PopupMenuPosition.under,
                         icon: const Icon(Icons.menu),
