@@ -44,7 +44,6 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         await rootBundle.loadString('assets/data/community_regex.json');
     final communityRegexData =
         List<Map<String, dynamic>>.from(await json.decode(response));
-    print(communityRegexData);
     setState(() {
       communityRegex = communityRegexData;
     });
