@@ -35,6 +35,8 @@ class _RegexFormWidgetState extends State<RegexFormWidget> {
         testText: widget.testText);
     try {
       await regexDao.insert(regex);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Regex saved!")));
       Navigator.of(context).pop();
     } catch (_) {
       setState(() {

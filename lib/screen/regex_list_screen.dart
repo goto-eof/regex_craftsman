@@ -19,64 +19,81 @@ class _RegexListScreenState extends State<RegexListScreen> {
       return await RegexDao().list();
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Your regex list"),
-      ),
-      body: FutureBuilder(
-        future: _retrieveFutureData(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text("Something went wrong"),
-            );
-          }
+    Future<int> _loadCountItems() async {
+      return await RegexDao().count();
+    }
 
-          if (snapshot.hasData) {
-            if (snapshot.data!.isEmpty) {
-              return const Center(
-                child: Text("No data"),
-              );
-            }
+    return FutureBuilder(
+      future: _loadCountItems(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Your regex list (${snapshot.data!})"),
+            ),
+            body: FutureBuilder(
+              future: _retrieveFutureData(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text("Something went wrong"),
+                  );
+                }
 
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                final data = snapshot.data![index];
-                return ListTile(
-                  title: Text(data.name),
-                  subtitle: Text(data.regex),
-                  leading: const Icon(Icons.developer_mode),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          await RegexDao().delete(data.id!);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text(
-                                      "Regex record deleted successfully")));
-                          setState(() {});
-                        },
-                      ),
-                      IconButton(
-                          onPressed: () async {
-                            await Clipboard.setData(
-                                ClipboardData(text: data.regex));
-                          },
-                          icon: const Icon(Icons.copy)),
-                    ],
-                  ),
-                );
+                if (snapshot.hasData) {
+                  if (snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text("No data"),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      final data = snapshot.data![index];
+                      return ListTile(
+                        title: Text(data.name),
+                        subtitle: Text(data.regex),
+                        leading: const Icon(Icons.developer_mode),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () async {
+                                await RegexDao().delete(data.id!);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            "Regex record deleted successfully")));
+                                setState(() {});
+                              },
+                            ),
+                            IconButton(
+                                onPressed: () async {
+                                  await Clipboard.setData(
+                                      ClipboardData(text: data.regex));
+                                },
+                                icon: const Icon(Icons.copy)),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
+
+                return const CircularProgressIndicator();
               },
-            );
-          }
-
-          return const CircularProgressIndicator();
-        },
-      ),
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text("Something went wrong"),
+          );
+        }
+        return const CircularProgressIndicator();
+      },
     );
   }
 }
