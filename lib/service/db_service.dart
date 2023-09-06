@@ -25,7 +25,7 @@ class DB {
     // final dbPath = await getDatabasesPath();
     final dbPath = await getDatabasesPath();
     db ??= await openDatabase(
-      join(directory ?? dbPath, 'regex_craftsman4.db'),
+      join(directory ?? dbPath, 'regex_craftsman.db'),
       onCreate: (db, version) {
         db.execute(
             'CREATE TABLE regex(id INTEGER PRIMARY KEY, name TXT NOT NULL UNIQUE, regex TEXT NOT NULL UNIQUE, test_text TEXT, insert_date_time TEXT)');
