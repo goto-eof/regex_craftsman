@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:regex_craftsman/help_screen.dart';
 import 'about_dialog.dart' as been_about_dialog;
 
 class RegexCraftsman extends StatefulWidget {
@@ -368,36 +369,38 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (value) {
-            setState(() {
-              _selectedIndex = value;
-            });
-          },
-          items: [
-            BottomNavigationBarItem(
-              tooltip: "Highlight matched strings",
-              icon: Icon(
-                Icons.colorize,
-                color: _selectedIndex == 0 ? Colors.deepPurple : null,
-              ),
-              label: "Match",
+        backgroundColor: Theme.of(context).colorScheme.background,
+        currentIndex: _selectedIndex,
+        onTap: (value) {
+          setState(() {
+            _selectedIndex = value;
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            tooltip: "Highlight matched strings",
+            icon: Icon(
+              Icons.colorize,
+              color: _selectedIndex == 0 ? Colors.deepPurple : null,
             ),
-            BottomNavigationBarItem(
-                tooltip: "View the list of matched strings",
-                icon: Icon(
-                  Icons.list,
-                  color: _selectedIndex == 1 ? Colors.deepPurple : null,
-                ),
-                label: "List"),
-            BottomNavigationBarItem(
-                tooltip: "Replace matched string with a custom keyword",
-                icon: Icon(
-                  Icons.find_replace,
-                  color: _selectedIndex == 2 ? Colors.deepPurple : null,
-                ),
-                label: "Replace"),
-          ]),
+            label: "Match",
+          ),
+          BottomNavigationBarItem(
+              tooltip: "View the list of matched strings",
+              icon: Icon(
+                Icons.list,
+                color: _selectedIndex == 1 ? Colors.deepPurple : null,
+              ),
+              label: "List"),
+          BottomNavigationBarItem(
+              tooltip: "Replace matched string with a custom keyword",
+              icon: Icon(
+                Icons.find_replace,
+                color: _selectedIndex == 2 ? Colors.deepPurple : null,
+              ),
+              label: "Replace"),
+        ],
+      ),
       appBar: AppBar(
         title: Row(
           children: [
@@ -410,7 +413,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         ),
         actions: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.only(top: 10, bottom: 10),
             child: IconButton(
               tooltip: "About this application",
               onPressed: () {
@@ -425,6 +428,18 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) {
+                      return const HelpScreen();
+                    },
+                  ));
+                },
+                icon: const Icon(Icons.book)),
+          )
         ],
       ),
       body: Container(
