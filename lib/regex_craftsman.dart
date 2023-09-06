@@ -149,9 +149,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                   child: SingleChildScrollView(
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(10),
                       child: Wrap(
-                        children: _colorizedText,
+                        children: _colorizedText.isEmpty
+                            ? [
+                                const Text(
+                                    "No data. Please fill Regex and Test text fields first.")
+                              ]
+                            : _colorizedText,
                       ),
                     ),
                   ),
@@ -307,7 +312,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 Expanded(
                   child: SingleChildScrollView(
                     child: SizedBox(
-                        width: double.infinity, child: Text(_textReplaced)),
+                        width: double.infinity,
+                        child: _textReplaced.isEmpty
+                            ? const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                    "No data. Please fill Regex and Test text fields first."),
+                              )
+                            : Text(_textReplaced)),
                   ),
                 ),
                 PopupMenuButton(
@@ -626,69 +638,84 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                primary: true,
-                                itemCount: _matches.length,
-                                itemBuilder: (context, index) {
-                                  return Card(
-                                    child:
-                                        ListTile(title: Text(_matches[index])),
-                                  );
-                                },
-                              ),
-                            ),
-                            PopupMenuButton<int>(
-                              tooltip: "Copy to clipboard",
-                              icon: const Icon(Icons.copy),
-                              position: PopupMenuPosition.under,
-                              itemBuilder: (BuildContext ctx) {
-                                return [
-                                  PopupMenuItem<int>(
-                                    onTap: () async {
-                                      final hightlightedText = _matches
-                                          .map((e) => e)
-                                          .toList()
-                                          .join(",");
-                                      _showCopyDoneSnackbarMessage(context);
-                                      await Clipboard.setData(ClipboardData(
-                                          text: hightlightedText));
-                                    },
-                                    child: const Row(
-                                      children: [
-                                        Icon(Icons.copy),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text("Copy list as CSV"),
-                                      ],
+                          children: _matches.isEmpty
+                              ? [
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text(
+                                      "No data. Please fill Regex and Test text fields first.",
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  )
+                                ]
+                              : [
+                                  Expanded(
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      primary: true,
+                                      itemCount: _matches.length,
+                                      itemBuilder: (context, index) {
+                                        return Card(
+                                          child: ListTile(
+                                              title: Text(_matches[index])),
+                                        );
+                                      },
                                     ),
                                   ),
-                                  const PopupMenuDivider(),
-                                  PopupMenuItem<int>(
-                                    onTap: () async {
-                                      final hightlightedText =
-                                          _matches.map((e) => e).toList();
-                                      _showCopyDoneSnackbarMessage(context);
-                                      await Clipboard.setData(ClipboardData(
-                                          text: jsonEncode(hightlightedText)));
-                                    },
-                                    child: const Row(
-                                      children: [
-                                        Icon(Icons.copy),
-                                        SizedBox(
-                                          width: 5,
+                                  PopupMenuButton<int>(
+                                    tooltip: "Copy to clipboard",
+                                    icon: const Icon(Icons.copy),
+                                    position: PopupMenuPosition.under,
+                                    itemBuilder: (BuildContext ctx) {
+                                      return [
+                                        PopupMenuItem<int>(
+                                          onTap: () async {
+                                            final hightlightedText = _matches
+                                                .map((e) => e)
+                                                .toList()
+                                                .join(",");
+                                            _showCopyDoneSnackbarMessage(
+                                                context);
+                                            await Clipboard.setData(
+                                                ClipboardData(
+                                                    text: hightlightedText));
+                                          },
+                                          child: const Row(
+                                            children: [
+                                              Icon(Icons.copy),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text("Copy list as CSV"),
+                                            ],
+                                          ),
                                         ),
-                                        Text("Copy list as JSON"),
-                                      ],
-                                    ),
+                                        const PopupMenuDivider(),
+                                        PopupMenuItem<int>(
+                                          onTap: () async {
+                                            final hightlightedText =
+                                                _matches.map((e) => e).toList();
+                                            _showCopyDoneSnackbarMessage(
+                                                context);
+                                            await Clipboard.setData(
+                                                ClipboardData(
+                                                    text: jsonEncode(
+                                                        hightlightedText)));
+                                          },
+                                          child: const Row(
+                                            children: [
+                                              Icon(Icons.copy),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text("Copy list as JSON"),
+                                            ],
+                                          ),
+                                        ),
+                                      ];
+                                    },
                                   ),
-                                ];
-                              },
-                            ),
-                          ],
+                                ],
                         ),
                       ),
                     ),
