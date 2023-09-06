@@ -7,8 +7,10 @@ Features:
 - underline matches
 - view matches as list
 - text replace
+- regex cheat sheet
 - copy to clipboard (as CSV / JSON) text that matches
 - copy to clipboard (as CSV / JSON) text that does not match
+- save, view saved and delete personal regex
 
 # Download from Snap Store (Ubuntu)
 
