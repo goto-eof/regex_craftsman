@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:regex_craftsman/help_screen.dart';
-import 'about_dialog.dart' as been_about_dialog;
+import 'package:regex_craftsman/screen/help_screen.dart';
+import 'package:regex_craftsman/screen/regex_list_screen.dart';
+import 'package:regex_craftsman/widget/regex_form_widget.dart';
+import 'widget/about_dialog.dart' as been_about_dialog;
 
 class RegexCraftsman extends StatefulWidget {
   const RegexCraftsman({super.key});
@@ -38,6 +40,13 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   void initState() {
     super.initState();
     _loadCommunityRegexFromJSON();
+  }
+
+  @override
+  dispose() {
+    super.dispose();
+    _regexController.dispose();
+    _replaceWithController.dispose();
   }
 
   Future<void> _loadCommunityRegexFromJSON() async {
@@ -427,6 +436,22 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           Container(
             padding: const EdgeInsets.only(top: 10, bottom: 10),
             child: IconButton(
+              tooltip: "Your regex list",
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) {
+                    return RegexListScreen();
+                  },
+                ));
+              },
+              icon: const Icon(
+                Icons.developer_mode,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.only(top: 10, bottom: 10),
+            child: IconButton(
               tooltip: "About this application",
               onPressed: () {
                 PackageInfo.fromPlatform().then((value) => showDialog(
@@ -487,10 +512,20 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 suffixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // IconButton(
-                    //   onPressed: () {},
-                    //   icon: const Icon(Icons.save),
-                    // ),
+                    IconButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return RegexFormWidget(
+                              regex: _regexController.text,
+                              testText: _testText,
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(Icons.save),
+                    ),
                     PopupMenuButton<int>(
                         tooltip: "Regular Expression configuration and utils",
                         position: PopupMenuPosition.under,
