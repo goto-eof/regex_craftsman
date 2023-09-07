@@ -108,6 +108,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     String testText =
         _testTextController.text.replaceAll("\r\n", "").replaceAll("\n", "");
     try {
+      Stopwatch s = Stopwatch();
+
       if (_regexController.text.isNotEmpty && testText.isNotEmpty) {
         setState(() {
           _colorizedText = [];
@@ -117,15 +119,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             caseSensitive: caseSensitive,
             dotAll: doAll,
             unicode: unicode);
+        int step = 0;
         while (exp.hasMatch(testText)) {
+          step++;
           var firstMatch = exp.firstMatch(testText);
-          // if (firstMatch!.start == firstMatch.end) {
-          //   ScaffoldMessenger.of(context).clearSnackBars();
-          //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          //       content: Text(
-          //           "Something went wrong when trying to parse the regex: invalid regex")));
-          //   return;
-          // }
           if (firstMatch!.start != 0) {
             _colorizedText.add(
                 _buildMatchText(text: testText.substring(0, firstMatch.start)));
@@ -138,9 +135,27 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           _colorizedText.add(const SizedBox(
             width: 5,
           ));
-
-          testText =
-              testText.substring(firstMatch.end == 0 ? 1 : firstMatch.end);
+          print("object");
+          print(testText);
+          print(firstMatch.end);
+          if (testText.isNotEmpty) {
+            testText =
+                testText.substring(firstMatch.end == 0 ? 1 : firstMatch.end);
+          }
+          if (s.elapsedMilliseconds > 100) {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    "Something went wrong when trying to parse the regex: regex loop")));
+            break;
+          }
+          if (step > 2000) {
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    "Something went wrong when trying to parse the regex: regex loop - too many steps")));
+            break;
+          }
         }
         if (testText.isNotEmpty) {
           _colorizedText.add(
@@ -157,11 +172,11 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              "Something went wrong when trying to parse the regex: $err")));
-      // setState(() {
-      //   _colorizedText = [];
-      //   _matches = [];
-      // });
+              "Something went wrong when trying to parse the regexx: $err")));
+      setState(() {
+        _colorizedText = [];
+        _matches = [];
+      });
     }
   }
 
@@ -528,9 +543,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 );
                 if (data != null) {
                   _regexController.text = data.regex;
-                  print(data.takeTestText);
                   if (data.takeTestText) {
-                    print(data.testText);
                     _testTextController.text = data.testText!;
                     _evaluate();
                     return;
