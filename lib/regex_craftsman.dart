@@ -119,10 +119,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             unicode: unicode);
         while (exp.hasMatch(testText)) {
           var firstMatch = exp.firstMatch(testText);
-          if (firstMatch!.start == firstMatch.end) {
-            return;
-          }
-          if (firstMatch.start != 0) {
+          // if (firstMatch!.start == firstMatch.end) {
+          //   ScaffoldMessenger.of(context).clearSnackBars();
+          //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          //       content: Text(
+          //           "Something went wrong when trying to parse the regex: invalid regex")));
+          //   return;
+          // }
+          if (firstMatch!.start != 0) {
             _colorizedText.add(
                 _buildMatchText(text: testText.substring(0, firstMatch.start)));
             _colorizedText.add(const SizedBox(
@@ -135,7 +139,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             width: 5,
           ));
 
-          testText = testText.substring(firstMatch.end);
+          testText =
+              testText.substring(firstMatch.end == 0 ? 1 : firstMatch.end);
         }
         if (testText.isNotEmpty) {
           _colorizedText.add(
@@ -149,9 +154,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         });
       }
     } catch (err) {
-      setState(() {
-        _colorizedText = [];
-      });
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              "Something went wrong when trying to parse the regex: $err")));
+      // setState(() {
+      //   _colorizedText = [];
+      //   _matches = [];
+      // });
     }
   }
 
@@ -747,7 +757,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                                       itemBuilder: (context, index) {
                                         return Card(
                                           child: ListTile(
-                                              title: Text(_matches[index])),
+                                              title: _matches[index].isEmpty
+                                                  ? const Text(
+                                                      "empty string",
+                                                      style: TextStyle(
+                                                          fontStyle:
+                                                              FontStyle.italic),
+                                                    )
+                                                  : Text(_matches[index])),
                                         );
                                       },
                                     ),
