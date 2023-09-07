@@ -76,12 +76,12 @@ class RegexDao {
         maps.length,
         (i) {
           return Regex(
-            id: maps[0]["id"],
-            name: maps[0]["name"],
-            regex: maps[0]["regex"],
-            testText: maps[0]["test_text"],
+            id: maps[i]["id"],
+            name: maps[i]["name"],
+            regex: maps[i]["regex"],
+            testText: maps[i]["test_text"],
             insertDateTime: DateTime.parse(
-              maps[0]["insert_date_time"],
+              maps[i]["insert_date_time"],
             ),
           );
         },

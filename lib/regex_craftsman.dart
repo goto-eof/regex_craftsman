@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:regex_craftsman/model/regex.dart';
 import 'package:regex_craftsman/screen/help_screen.dart';
 import 'package:regex_craftsman/screen/regex_list_screen.dart';
 import 'package:regex_craftsman/widget/regex_form_widget.dart';
@@ -467,12 +468,18 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 const EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 10),
             child: IconButton(
               tooltip: "Your regex list",
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return RegexListScreen();
-                  },
-                ));
+              onPressed: () async {
+                Regex? data = await Navigator.of(context).push<Regex>(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return RegexListScreen();
+                    },
+                  ),
+                );
+                if (data != null) {
+                  _regexController.text = data.regex;
+                  _evaluate();
+                }
               },
               icon: const Icon(
                 Icons.developer_mode,

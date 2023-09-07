@@ -41,6 +41,8 @@ class _RegexListScreenState extends State<RegexListScreen> {
                 }
 
                 if (snapshot.hasData) {
+                  print(snapshot.data!.map((e) => e.name));
+
                   if (snapshot.data!.isEmpty) {
                     return const Center(
                       child: Text("No data"),
@@ -52,6 +54,7 @@ class _RegexListScreenState extends State<RegexListScreen> {
                     itemBuilder: (context, index) {
                       final data = snapshot.data![index];
                       return ListTile(
+                        key: Key(data.name),
                         title: Text(data.name),
                         subtitle: Text(data.regex),
                         leading: const Icon(Icons.developer_mode),
@@ -70,11 +73,22 @@ class _RegexListScreenState extends State<RegexListScreen> {
                               },
                             ),
                             IconButton(
-                                onPressed: () async {
-                                  await Clipboard.setData(
-                                      ClipboardData(text: data.regex));
-                                },
-                                icon: const Icon(Icons.copy)),
+                              onPressed: () async {
+                                await Clipboard.setData(
+                                    ClipboardData(text: data.regex));
+                              },
+                              icon: const Icon(
+                                Icons.copy,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () async {
+                                Navigator.of(context).pop(data);
+                              },
+                              icon: const Icon(
+                                Icons.arrow_right,
+                              ),
+                            ),
                           ],
                         ),
                       );
