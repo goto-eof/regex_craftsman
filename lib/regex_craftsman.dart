@@ -433,24 +433,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           ],
         ),
         actions: [
-          Container(
-            padding: const EdgeInsets.only(top: 10, bottom: 10),
-            child: IconButton(
-              tooltip: "Your regex list",
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) {
-                    return RegexListScreen();
-                  },
-                ));
-              },
-              icon: const Icon(
-                Icons.developer_mode,
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.only(top: 10, bottom: 10),
+          Padding(
+            padding: const EdgeInsets.all(5.0),
             child: IconButton(
               tooltip: "About this application",
               onPressed: () {
@@ -466,8 +450,9 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(right: 10),
+            padding: const EdgeInsets.all(5.0),
             child: IconButton(
+                tooltip: "Regex Cheat Sheet",
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) {
@@ -476,7 +461,24 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                   ));
                 },
                 icon: const Icon(Icons.book)),
-          )
+          ),
+          Container(
+            padding:
+                const EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 10),
+            child: IconButton(
+              tooltip: "Your regex list",
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) {
+                    return RegexListScreen();
+                  },
+                ));
+              },
+              icon: const Icon(
+                Icons.developer_mode,
+              ),
+            ),
+          ),
         ],
       ),
       body: Container(
@@ -513,6 +515,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
+                      tooltip: "Save Regex",
                       onPressed: () {
                         showDialog(
                           context: context,
