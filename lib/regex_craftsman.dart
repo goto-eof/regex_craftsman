@@ -105,8 +105,8 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   }
 
   _processColorizedText() {
-    String testText =
-        _testTextController.text.replaceAll("\r\n", "").replaceAll("\n", "");
+    String testText = _testTextController
+        .text; //.replaceAll("\r\n", "").replaceAll("\n", "");
     try {
       Stopwatch s = Stopwatch();
 
@@ -312,11 +312,20 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   }
 
   _buildMatchText({String text = "test", colorized = false}) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: colorized ? Colors.deepOrange : null,
-        fontSize: colorized ? 16 : null,
+    text = text.replaceAll("\n", "¶").replaceAll(" ", "˽");
+    return Container(
+      decoration: BoxDecoration(
+          border: Border.all(
+              width: 1,
+              color: colorized
+                  ? Colors.deepOrange
+                  : const Color.fromARGB(0, 0, 0, 0))),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: colorized ? Colors.deepOrange : null,
+          fontSize: colorized ? 16 : null,
+        ),
       ),
     );
   }
