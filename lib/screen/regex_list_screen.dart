@@ -62,6 +62,7 @@ class _RegexListScreenState extends State<RegexListScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
+                              tooltip: "Delete",
                               icon: const Icon(Icons.delete),
                               onPressed: () async {
                                 await RegexDao().delete(data.id!);
@@ -73,6 +74,7 @@ class _RegexListScreenState extends State<RegexListScreen> {
                               },
                             ),
                             IconButton(
+                              tooltip: "Copy to clipboard",
                               onPressed: () async {
                                 await Clipboard.setData(
                                     ClipboardData(text: data.regex));
@@ -82,11 +84,12 @@ class _RegexListScreenState extends State<RegexListScreen> {
                               ),
                             ),
                             IconButton(
+                              tooltip: "Take",
                               onPressed: () async {
                                 Navigator.of(context).pop(data);
                               },
                               icon: const Icon(
-                                Icons.arrow_right,
+                                Icons.play_arrow,
                               ),
                             ),
                           ],
