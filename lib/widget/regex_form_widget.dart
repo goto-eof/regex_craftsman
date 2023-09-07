@@ -26,8 +26,16 @@ class _RegexFormWidgetState extends State<RegexFormWidget> {
   }
 
   void _save() async {
-    print(_nameController.text);
-    if (_nameController.text.isEmpty) {
+    if (_nameController.text.trim().isEmpty) {
+      setState(() {
+        validationMessage = "Name should not be empty";
+      });
+      return;
+    }
+    if (widget.regex.trim().isEmpty) {
+      setState(() {
+        validationMessage = "Regex should not be empty";
+      });
       return;
     }
     RegexDao regexDao = RegexDao();
@@ -77,8 +85,11 @@ class _RegexFormWidgetState extends State<RegexFormWidget> {
               autofocus: true,
               decoration: InputDecoration(
                   label: const Text("Name"),
-                  helperStyle: const TextStyle(color: Colors.red),
-                  helperText: validationMessage ?? ""),
+                  helperStyle: TextStyle(
+                      color: validationMessage != null
+                          ? Colors.red
+                          : Theme.of(context).colorScheme.onBackground),
+                  helperText: validationMessage ?? "Press Enter key to save"),
               controller: _nameController,
             ),
           ),
