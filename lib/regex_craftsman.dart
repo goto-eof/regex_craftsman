@@ -74,6 +74,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
       _processColorizedText();
       _processReplaceWith(null);
     } catch (err) {
+      ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
               "Something went wrong when trying to parse the regex: $err")));
