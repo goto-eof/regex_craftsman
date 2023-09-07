@@ -455,12 +455,17 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             padding: const EdgeInsets.all(5.0),
             child: IconButton(
                 tooltip: "Regex Cheat Sheet",
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
+                onPressed: () async {
+                  String? regex =
+                      await Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) {
                       return const HelpScreen();
                     },
                   ));
+                  if (regex != null) {
+                    _regexController.text = regex;
+                    _evaluate();
+                  }
                 },
                 icon: const Icon(Icons.book)),
           ),

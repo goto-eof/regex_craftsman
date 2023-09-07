@@ -41,8 +41,6 @@ class _RegexListScreenState extends State<RegexListScreen> {
                 }
 
                 if (snapshot.hasData) {
-                  print(snapshot.data!.map((e) => e.name));
-
                   if (snapshot.data!.isEmpty) {
                     return const Center(
                       child: Text("No data"),
@@ -54,6 +52,7 @@ class _RegexListScreenState extends State<RegexListScreen> {
                     itemBuilder: (context, index) {
                       final data = snapshot.data![index];
                       return ListTile(
+                        hoverColor: Theme.of(context).colorScheme.onBackground,
                         key: Key(data.name),
                         title: Text(data.name),
                         subtitle: Text(data.regex),
