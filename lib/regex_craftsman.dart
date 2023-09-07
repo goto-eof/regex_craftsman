@@ -339,13 +339,24 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
         TextField(
           onChanged: _processReplaceWith,
           controller: _replaceWithController,
-          decoration: const InputDecoration(
-              prefixIcon: Padding(
+          decoration: InputDecoration(
+              prefixIcon: const Padding(
                 padding: EdgeInsets.only(left: 10, right: 10),
                 child: Icon(Icons.text_fields),
               ),
-              label: Text("Replace with"),
-              border: OutlineInputBorder(
+              suffixIcon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        _replaceWithController.text = "";
+                        _evaluate();
+                      },
+                      icon: const Icon(Icons.clear))
+                ],
+              ),
+              label: const Text("Replace with"),
+              border: const OutlineInputBorder(
                   borderSide: BorderSide(width: 1, color: Colors.black),
                   borderRadius: BorderRadius.all(Radius.circular(4)))),
         ),
@@ -371,16 +382,18 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                   child: SingleChildScrollView(
                     child: SizedBox(
                         width: double.infinity,
-                        child: _textReplaced.isEmpty
-                            ? const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Text(
-                                    "No data. Please fill Regex and Test text fields first."),
-                              )
-                            : Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(_textReplaced),
-                              )),
+                        child:
+                            // _textReplaced.isEmpty
+                            //     ? const Padding(
+                            //         padding: EdgeInsets.all(8.0),
+                            //         child: Text(
+                            //             "No data. Please fill Regex and Test text fields first."),
+                            //       )
+                            //     :
+                            Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(_textReplaced),
+                        )),
                   ),
                 ),
                 PopupMenuButton(
@@ -426,6 +439,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     if (_regexController.text.isEmpty || _testTextController.text.isEmpty) {
       return;
     }
+    print("HELLO");
     setState(() {
       _textReplaced = _testTextController.text.replaceAll(
           RegExp(_regexController.text,
