@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:regex_craftsman/regex_craftsman.dart';
@@ -24,12 +22,11 @@ final themeDark = ThemeData(
 );
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isLinux) {}
   runApp(MaterialApp(
     theme: theme,
     themeMode: ThemeMode.system,
     darkTheme: themeDark,
     debugShowCheckedModeBanner: false,
-    home: RegexCraftsman(),
+    home: const RegexCraftsman(),
   ));
 }
