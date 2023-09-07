@@ -84,6 +84,9 @@ class _RegexFormWidgetState extends State<RegexFormWidget> {
             child: TextField(
               autofocus: true,
               decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                      borderSide: BorderSide(width: 1, color: Colors.black),
+                      borderRadius: BorderRadius.all(Radius.circular(4))),
                   label: const Text("Name"),
                   helperStyle: TextStyle(
                       color: validationMessage != null
