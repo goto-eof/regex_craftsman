@@ -66,6 +66,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
       if (_regexController.text.isEmpty || _testTextController.text.isEmpty) {
         setState(() {
           _matches = [];
+          _colorizedText = [];
         });
         return;
       }
@@ -600,6 +601,14 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
+                      tooltip: "Clear field",
+                      onPressed: () {
+                        _regexController.text = "";
+                        _evaluate();
+                      },
+                      icon: const Icon(Icons.clear),
+                    ),
+                    IconButton(
                       tooltip: "Save Regex",
                       onPressed: () {
                         showDialog(
@@ -729,8 +738,21 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               onChanged: (value) {
                 _evaluate();
               },
-              decoration: const InputDecoration(
-                  prefixIcon: Padding(
+              decoration: InputDecoration(
+                  suffixIcon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: "Clear field",
+                        onPressed: () {
+                          _testTextController.text = "";
+                          _evaluate();
+                        },
+                        icon: const Icon(Icons.clear),
+                      ),
+                    ],
+                  ),
+                  prefixIcon: const Padding(
                     padding: EdgeInsets.only(left: 10, right: 10),
                     child: Icon(Icons.text_fields),
                   ),
