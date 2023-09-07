@@ -135,9 +135,6 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           _colorizedText.add(const SizedBox(
             width: 5,
           ));
-          print("object");
-          print(testText);
-          print(firstMatch.end);
           if (testText.isNotEmpty) {
             testText =
                 testText.substring(firstMatch.end == 0 ? 1 : firstMatch.end);
@@ -371,7 +368,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                                 child: Text(
                                     "No data. Please fill Regex and Test text fields first."),
                               )
-                            : Text(_textReplaced)),
+                            : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(_textReplaced),
+                              )),
                   ),
                 ),
                 PopupMenuButton(
