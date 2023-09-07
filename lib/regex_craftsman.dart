@@ -120,7 +120,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
             dotAll: doAll,
             unicode: unicode);
         int step = 0;
-        while (exp.hasMatch(testText)) {
+        while (exp.hasMatch(testText) && testText.isNotEmpty) {
           step++;
           var firstMatch = exp.firstMatch(testText);
           if (firstMatch!.start != 0) {
