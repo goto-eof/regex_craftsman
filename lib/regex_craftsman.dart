@@ -105,8 +105,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   }
 
   _processColorizedText() {
-    String testText = _testTextController
-        .text; //.replaceAll("\r\n", "").replaceAll("\n", "");
+    String testText = _testTextController.text;
     try {
       Stopwatch s = Stopwatch();
 
