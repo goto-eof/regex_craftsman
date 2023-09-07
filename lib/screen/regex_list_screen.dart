@@ -58,7 +58,13 @@ class _RegexListScreenState extends State<RegexListScreen> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
-                          children: [Text(data.regex), Text(data.testText!)],
+                          children: [
+                            Text(
+                              data.regex,
+                              style: const TextStyle(color: Colors.purple),
+                            ),
+                            Text(data.testText!)
+                          ],
                         ),
                         leading: const Icon(Icons.developer_mode),
                         trailing: Row(
