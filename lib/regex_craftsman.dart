@@ -348,6 +348,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
+                      tooltip: "Clear field",
                       onPressed: () {
                         _replaceWithController.text = "";
                         _evaluate();
