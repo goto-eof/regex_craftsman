@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:regex_craftsman/dao/regex_dao.dart';
 import 'package:regex_craftsman/model/regex.dart';
 
@@ -16,6 +17,7 @@ class RegexFormWidget extends StatefulWidget {
 
 class _RegexFormWidgetState extends State<RegexFormWidget> {
   final TextEditingController _nameController = TextEditingController();
+  var focusNode = FocusNode();
   String? validationMessage;
   @override
   void dispose() {
@@ -64,12 +66,21 @@ class _RegexFormWidgetState extends State<RegexFormWidget> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(
-            decoration: InputDecoration(
-                label: const Text("Name"),
-                helperStyle: const TextStyle(color: Colors.red),
-                helperText: validationMessage ?? ""),
-            controller: _nameController,
+          RawKeyboardListener(
+            focusNode: focusNode,
+            onKey: (event) {
+              if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
+                _save();
+              }
+            },
+            child: TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                  label: const Text("Name"),
+                  helperStyle: const TextStyle(color: Colors.red),
+                  helperText: validationMessage ?? ""),
+              controller: _nameController,
+            ),
           ),
         ],
       ),
