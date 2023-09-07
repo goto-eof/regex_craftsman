@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:regex_craftsman/model/regex.dart';
 import 'package:regex_craftsman/screen/help_screen.dart';
+import 'package:regex_craftsman/screen/regex_cheat_sheet_screen.dart';
 import 'package:regex_craftsman/screen/regex_list_screen.dart';
 import 'package:regex_craftsman/widget/regex_form_widget.dart';
 import 'widget/about_dialog.dart' as been_about_dialog;
@@ -62,6 +63,12 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
 
   void _evaluate() {
     try {
+      if (_regexController.text.isEmpty || _testText.isEmpty) {
+        setState(() {
+          _matches = [];
+        });
+        return;
+      }
       RegExp exp = RegExp(_regexController.text,
           multiLine: multiline,
           caseSensitive: caseSensitive,
@@ -142,9 +149,9 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   _loadColorizedText() {
     return Column(
       children: [
-        const Padding(
-          padding: EdgeInsets.all(20),
-          child: Text("Match Result"),
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text("Match Result (${_matches.length} matches)"),
         ),
         Expanded(
           child: Container(
@@ -447,6 +454,24 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                     }));
               },
               icon: const Icon(
+                Icons.account_circle,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(5.0),
+            child: IconButton(
+              tooltip: "Help",
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return HelpScreen();
+                    },
+                  ),
+                );
+              },
+              icon: const Icon(
                 Icons.help,
               ),
             ),
@@ -459,7 +484,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                   String? regex =
                       await Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) {
-                      return const HelpScreen();
+                      return const RegexCheatSheetScreen();
                     },
                   ));
                   if (regex != null) {
@@ -678,9 +703,9 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               Expanded(
                 child: Column(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Text("List Result"),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text("List Result (${_matches.length} matches)"),
                     ),
                     Expanded(
                       child: Container(
