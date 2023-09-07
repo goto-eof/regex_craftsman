@@ -4,12 +4,14 @@ class Regex {
       required this.name,
       required this.regex,
       this.testText,
-      this.insertDateTime});
+      this.insertDateTime})
+      : this.takeTestText = false;
   int? id;
   String name;
   String regex;
   String? testText;
   DateTime? insertDateTime;
+  bool takeTestText;
 
   Map<String, dynamic> toMap() {
     return {

@@ -20,7 +20,6 @@ class RegexCraftsman extends StatefulWidget {
 }
 
 class _RegexCraftsmanState extends State<RegexCraftsman> {
-  String _testText = "";
   String _textReplaced = "";
 
   List<String> _matches = [];
@@ -28,7 +27,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
 
   final TextEditingController _regexController = TextEditingController();
   final TextEditingController _replaceWithController = TextEditingController();
-
+  final TextEditingController _testTextController = TextEditingController();
   int _selectedIndex = 0;
 
   List<Widget> _colorizedText = [];
@@ -49,6 +48,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
     super.dispose();
     _regexController.dispose();
     _replaceWithController.dispose();
+    _testTextController.dispose();
   }
 
   Future<void> _loadCommunityRegexFromJSON() async {
@@ -63,7 +63,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
 
   void _evaluate() {
     try {
-      if (_regexController.text.isEmpty || _testText.isEmpty) {
+      if (_regexController.text.isEmpty || _testTextController.text.isEmpty) {
         setState(() {
           _matches = [];
         });
@@ -74,7 +74,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           caseSensitive: caseSensitive,
           dotAll: doAll,
           unicode: unicode);
-      Iterable<RegExpMatch> matches = exp.allMatches(_testText);
+      Iterable<RegExpMatch> matches = exp.allMatches(_testTextController.text);
       setState(() {
         _matches = matches.map((e) => e[0]!).toList();
       });
@@ -85,6 +85,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
               "Something went wrong when trying to parse the regex: $err")));
+      setState(() {
+        _colorizedText = [];
+        _matches = [];
+      });
     }
   }
 
@@ -101,9 +105,10 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   }
 
   _processColorizedText() {
-    String testText = _testText.replaceAll("\r\n", "").replaceAll("\n", "");
+    String testText =
+        _testTextController.text.replaceAll("\r\n", "").replaceAll("\n", "");
     try {
-      if (_regexController.text.isNotEmpty & testText.isNotEmpty) {
+      if (_regexController.text.isNotEmpty && testText.isNotEmpty) {
         setState(() {
           _colorizedText = [];
         });
@@ -143,7 +148,11 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
           _colorizedText = [..._colorizedText];
         });
       }
-    } catch (err) {}
+    } catch (err) {
+      setState(() {
+        _colorizedText = [];
+      });
+    }
   }
 
   _loadColorizedText() {
@@ -224,7 +233,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       const PopupMenuDivider(),
                       PopupMenuItem<int>(
                         onTap: () async {
-                          final notHightlightedText = _testText
+                          final notHightlightedText = _testTextController.text
                               .split(
                                 RegExp(_regexController.text,
                                     multiLine: multiline,
@@ -249,12 +258,12 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                       ),
                       PopupMenuItem<int>(
                         onTap: () async {
-                          final notHightlightedText = _testText.split(RegExp(
-                              _regexController.text,
-                              multiLine: multiline,
-                              caseSensitive: caseSensitive,
-                              dotAll: doAll,
-                              unicode: unicode));
+                          final notHightlightedText = _testTextController.text
+                              .split(RegExp(_regexController.text,
+                                  multiLine: multiline,
+                                  caseSensitive: caseSensitive,
+                                  dotAll: doAll,
+                                  unicode: unicode));
                           _showCopyDoneSnackbarMessage(context);
                           await Clipboard.setData(ClipboardData(
                               text: jsonEncode(notHightlightedText)));
@@ -380,11 +389,11 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
   }
 
   void _processReplaceWith(_) {
-    if (_regexController.text.isEmpty || _testText.isEmpty) {
+    if (_regexController.text.isEmpty || _testTextController.text.isEmpty) {
       return;
     }
     setState(() {
-      _textReplaced = _testText.replaceAll(
+      _textReplaced = _testTextController.text.replaceAll(
           RegExp(_regexController.text,
               multiLine: multiline,
               caseSensitive: caseSensitive,
@@ -503,12 +512,19 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                 Regex? data = await Navigator.of(context).push<Regex>(
                   MaterialPageRoute(
                     builder: (context) {
-                      return RegexListScreen();
+                      return const RegexListScreen();
                     },
                   ),
                 );
                 if (data != null) {
                   _regexController.text = data.regex;
+                  print(data.takeTestText);
+                  if (data.takeTestText) {
+                    print(data.testText);
+                    _testTextController.text = data.testText!;
+                    _evaluate();
+                    return;
+                  }
                   _evaluate();
                 }
               },
@@ -560,7 +576,7 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
                           builder: (context) {
                             return RegexFormWidget(
                               regex: _regexController.text,
-                              testText: _testText,
+                              testText: _testTextController.text,
                             );
                           },
                         );
@@ -678,11 +694,9 @@ class _RegexCraftsmanState extends State<RegexCraftsman> {
               height: 20,
             ),
             TextField(
+              controller: _testTextController,
               onChanged: (value) {
-                setState(() {
-                  _testText = value;
-                  _evaluate();
-                });
+                _evaluate();
               },
               decoration: const InputDecoration(
                   prefixIcon: Padding(

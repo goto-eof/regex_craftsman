@@ -55,7 +55,11 @@ class _RegexListScreenState extends State<RegexListScreen> {
                         hoverColor: Theme.of(context).colorScheme.onBackground,
                         key: Key(data.name),
                         title: Text(data.name),
-                        subtitle: Text(data.regex),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [Text(data.regex), Text(data.testText!)],
+                        ),
                         leading: const Icon(Icons.developer_mode),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -73,7 +77,7 @@ class _RegexListScreenState extends State<RegexListScreen> {
                               },
                             ),
                             IconButton(
-                              tooltip: "Copy to clipboard",
+                              tooltip: "Copy Regex to clipboard",
                               onPressed: () async {
                                 await Clipboard.setData(
                                     ClipboardData(text: data.regex));
@@ -83,12 +87,22 @@ class _RegexListScreenState extends State<RegexListScreen> {
                               ),
                             ),
                             IconButton(
-                              tooltip: "Take",
+                              tooltip: "Take Regex",
                               onPressed: () async {
                                 Navigator.of(context).pop(data);
                               },
                               icon: const Icon(
                                 Icons.play_arrow,
+                              ),
+                            ),
+                            IconButton(
+                              tooltip: "Take Regex and Test text",
+                              onPressed: () async {
+                                data.takeTestText = true;
+                                Navigator.of(context).pop(data);
+                              },
+                              icon: const Icon(
+                                Icons.fast_forward_outlined,
                               ),
                             ),
                           ],
